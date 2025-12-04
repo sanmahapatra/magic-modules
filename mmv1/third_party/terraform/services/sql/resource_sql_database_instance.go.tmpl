@@ -2577,9 +2577,21 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 	}
 
 	failoverDrReplicaName := d.Get("replication_cluster.0.failover_dr_replica_name").(string)
-	if failoverDrReplicaName != "" {
-		instance.ReplicationCluster = &sqladmin.ReplicationCluster{
-			FailoverDrReplicaName: failoverDrReplicaName,
+	psaWriteEndpoint := d.Get("replication_cluster.0.psa_write_endpoint").(string)
+	if failoverDrReplicaName != "" || psaWriteEndpoint != "" {
+		if failoverDrReplicaName != "" && psaWriteEndpoint != "" {
+			instance.ReplicationCluster = &sqladmin.ReplicationCluster{
+				FailoverDrReplicaName: failoverDrReplicaName,
+				PsaWriteEndpoint: psaWriteEndpoint,
+			}
+		} else if failoverDrReplicaName != "" {
+			instance.ReplicationCluster = &sqladmin.ReplicationCluster{
+				FailoverDrReplicaName: failoverDrReplicaName,
+			}
+		} else {
+			instance.ReplicationCluster = &sqladmin.ReplicationCluster{
+				PsaWriteEndpoint: psaWriteEndpoint,
+			}
 		}
 	}
 
